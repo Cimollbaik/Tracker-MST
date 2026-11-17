@@ -2334,11 +2334,14 @@ function parseCSVText(text,sep){
 }
 function detectSeparator(firstLine){const semi=(firstLine.match(/;/g)||[]).length;const comma=(firstLine.match(/,/g)||[]).length;return semi>comma?';':',';}
 function detectPlatformFromHeaders(headers,sep){
-  const h=headers.map(x=>(x||'').toLowerCase().trim());
+  const h=headers.map(x=>(x||'').replace(/^\uFEFF/,'').toLowerCase().trim());
   if(sep===';')return 'magnific';
   if(h.includes('license'))return 'vecteezy';
   if(h.some(x=>x.includes('mature')))return 'shutterstock';
   if(h.some(x=>x.includes('generative')))return 'adobe';
+  // Adobe Stock tanpa kolom AI: Filename, Title, Keywords, Category (+ Releases)
+  const has=n=>h.some(x=>x===n);
+  if((has('filename')||has('file name'))&&has('title')&&has('keywords')&&(has('category')||has('releases')))return 'adobe';
   return null;
 }
 // Judul berisi "icons" (jamak) atau "set/collection/pack/bundle of icon" = satu set icon, bukan single icon.
